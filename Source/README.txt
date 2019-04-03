@@ -1,3 +1,11 @@
+Config file format:
+[Connection]
+host=127.0.0.1
+user=Itai
+Password=MySqlPassword
+
+
+
 # Code
 
 Python code for data analytics and LaTex image/table generation.
