@@ -11,12 +11,15 @@ from sqlalchemy.orm import sessionmaker
 
 
 class CDatabase:
-   def __init__(self,host:str, user:str, Password:str, Pipe:str)->bool:
+   def __init__():
+      return
+
+   def Connect(self,host:str, Pipe:int, user:str, Password:str)->bool:
       self.engine = create_engine('mysql://' + 'root:MySqlPassword' + '@' + '127.0.0.1' + ':' + str(3306) + '/' + 'MySQL', echo=False)
       self.metadata = MetaData(bind=self.engine)
       self.Session = sessionmaker(bind=self.engine)
       self.db_session = self.Session()
-      return
+      return(True);
 
    def CreateTables(self)->bool:
       self.repository_table = Table('repository', self.metadata
@@ -43,3 +46,7 @@ class CDatabase:
                            )
       # create tables in database
       self.metadata.create_all()
+      return(True);
+
+
+

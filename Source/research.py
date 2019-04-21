@@ -18,7 +18,7 @@ from datetime import datetime
 from Base import Config
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData, Column, Table, ForeignKey
-from sqlalchemy import Integer, String, DateTime
+from sqlalchemy import Integer, String, DateTime, VARCHAR
 from sqlalchemy import func
 from sqlalchemy.orm import sessionmaker
 
@@ -48,6 +48,7 @@ issue_table = Table('issue', metadata,
                     Column('number', Integer),
                     Column('open_date', DateTime),
                     Column('close_date', DateTime),
+                     Column('issue', VARCHAR(500)),
                     mysql_engine='InnoDB',
                     )
 
