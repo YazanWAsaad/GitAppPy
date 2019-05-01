@@ -12,3 +12,6 @@ Legacy authentication
 User:       Itai
 Password:   MySqlPassword
 Windows service:    MySQL80
+
+Run Sql server:
+"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqld"

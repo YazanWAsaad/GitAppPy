@@ -22,12 +22,21 @@ from sqlalchemy import Integer, String, DateTime, VARCHAR
 from sqlalchemy import func
 from sqlalchemy.orm import sessionmaker
 
+
+
+
+
+
 ConfigFile:Config = Config.ConfigCls('../Config.ini')
 db_host = ConfigFile.DbHost();
 db_user = ConfigFile.DbUser();
 db_password = ConfigFile.DbPassword();
-#engine = create_engine('mysql://' + 'root:MySqlPassword' + '@' + '127.0.0.1' + ':' + str(3306) + '/' + 'MySQL', echo=False)
 engine = create_engine('mysql://' + 'root:' + db_password + '@' + db_host + ':' + str(3306) + '/' + 'github', echo=False)
+
+
+
+
+
 
 metadata = MetaData(bind=engine)
 Session = sessionmaker(bind=engine)
@@ -90,13 +99,20 @@ git_password=ConfigFile.GitPassword()
 git_session.auth = (git_user, git_password)
 
 # Get some random words
-f = open('words.txt', 'r')
-print('Hello')
-words = f.read()
-print(words)
-random_words = words.split('\n')
+def RandomWords()->list:
+   combined_words = []
+   f = open('WordsAspects.txt', 'r')
+   words_aspects = f.read().split('\n')
 
+   f = open('WordsDomain.txt', 'r')
+   words_domain = f.read().split('\n')
+   for domain in words_domain:
+      for aspect in words_aspects:
+         if(domain and aspect):
+            combined_words.append(domain + '+' + aspect)
+   return (combined_words);
 
+random_words = RandomWords();
 
 
 
@@ -120,10 +136,11 @@ def _get_user_organizations(user):
 def _get_random_repo():
    while True:
       keyword = random.choice(random_words)
-      response = git_session.get('https://api.github.com/legacy/repos/search/' + keyword)
+      response = git_session.get('https://api.github.com/legacy/repos/search/' +  "q=" +keyword)
       _check_quota(response)
       if (response.ok):
          repos = json.loads(response.text or response.content)
+         print("Key words:" + keyword + " Repositories found:" + str(len(repos['repositories'])))
          if (len(repos['repositories']) > 0):
             repo = random.choice(repos['repositories'])
             userame = repo['username']
@@ -152,11 +169,6 @@ def crawl(sample_size):
       try:
          repo = {};
          repo_rand = _get_random_repo();
-#         for repo_field in repo_rand:
-#            if repo_field in repo_fields_arr:
-#               repo[repo_field]=repo_rand[repo_field]
-#         i = repository_table.insert([repo])
-#         i.execute()
          repo = InsertFields(repo_fields_arr, repo_rand, repository_table)
 
          url = 'https://api.github.com/repos/' + repo_rand['full_name'] + '/commits?per_page=100'
@@ -172,8 +184,6 @@ def crawl(sample_size):
                   else:
                      committer = commit['commit']['author']['name'].encode('unicode_escape')
 
-#                  i = commit_table.insert(dict(repository_id=repo['id'], committer=committer))
-#                  i.execute()
                   InsertFields(commit_arr, dict(repository_id=repo_rand['id'], committer=committer), commit_table)
 
                links = response.links
@@ -197,7 +207,6 @@ def crawl(sample_size):
                      i = issue_table.insert(
                            dict( number=issue['number'], repository_id=repo_rand['id'], creator=issue['user']['login'],
                                  open_date=created_at, close_date=closed_at));
-                           #open_date=issue['created_at'], close_date=issue['closed_at']))
                      i.execute()
                      InsertFields()
 
