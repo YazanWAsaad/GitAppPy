@@ -20,7 +20,7 @@ def TextRead(file_name:str)->str:
 
 
 def TextReadLines(file_name:str)->str:
-   f=open('words.txt','r')
+   f=open('WordsDomain.txt','r')
    words = f.read()
    return(words.split('\n'));
 
