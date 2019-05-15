@@ -50,6 +50,25 @@ milestone_table, milestone_arr = Database.DbAddMilestonesTable();
 comments_table, comments_arr =  Database.DbAddCommentsTable();
 
 
+millstone_arr = ['id', 'repository_id', 'name', 'creator', 'descripcion'];
+millstone_table = Table('millstone' ,metadata,
+                        Column('id', Integer, autoincrement=True, primary_key=True),
+                        Column('repository_id', Integer, ForeignKey('repository.id')),
+                        Column('name', String(60)),
+                        Column('creator', String(60)),
+                        Column('description', VARCHAR(500)),
+                    )
+
+comments_arr = ['id', 'issue_id', 'body'];
+comments_table = Table('comments', metadata,
+                      Column('id', Integer, autoincrement=True, primary_key=True),
+                      Column('issue_id',  Integer, ForeignKey('issue.id')),
+                      Column('body', VARCHAR),
+                       )
+
+
+
+
 # create tables in database
 db_sql.create_all()
 
@@ -193,3 +212,4 @@ def crawl(sample_size):
 
 
 crawl(5000)
+
