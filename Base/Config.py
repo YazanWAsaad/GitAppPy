@@ -1,4 +1,8 @@
 import configparser
+from GitAppPy.Base import Files
+
+
+
 
 
 class ConfigCls:
@@ -34,3 +38,19 @@ class ConfigCls:
         password:str="";
         if(None != self.config):password = self.config['GitConnection']['Password']
         return(password);
+
+
+
+    def WordsDomain(self)->str:
+        domain_words:str="";
+        if(None != self.config):
+            file_name = self.config['WordFiles']['WordsDomain']
+            words = Files.TextReadLines(file_name);
+            return(words);
+
+    def WordsAspects(self)->str:
+        aspects_words:str="";
+        if(None != self.config):
+            file_name = self.config['WordFiles']['WordsAspects'];
+            words = Files.TextReadLines(file_name);
+            return(words);

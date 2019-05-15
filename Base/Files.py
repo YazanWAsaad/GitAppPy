@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import configparser
 
 
@@ -15,14 +16,13 @@ def WorkingDir()->str:
 
 #  Text File handlers API
 def TextRead(file_name:str)->str:
-   f = open(file_name, 'r')
+   file_path = WorkingDir() + file_name;
+   f = open(file_path, 'r')
    return(f.read())
 
 
 def TextReadLines(file_name:str)->str:
-   f=open('WordsDomain.txt','r')
-   words = f.read()
-   return(words.split('\n'));
+   return(TextRead(file_name).split('\n'));
 
 def TextWrite(file_name:str,txt:str)->bool:
    result :bool = True

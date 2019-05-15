@@ -15,85 +15,72 @@ import random
 from config import *
 import json
 from datetime import datetime
-from Base import Config
-from sqlalchemy import create_engine
+from GitAppPy.Base.Config import ConfigCls
+from GitAppPy.Base.SqlDb import Database
+
+#from sqlalchemy import create_engine
 from sqlalchemy import MetaData, Column, Table, ForeignKey
-from sqlalchemy import Integer, String, DateTime, VARCHAR
-from sqlalchemy import func
-from sqlalchemy.orm import sessionmaker
+#from sqlalchemy import Integer, String, DateTime, VARCHAR
+#from sqlalchemy import func
+#from sqlalchemy.orm import sessionmaker
+
+
+
+
+
+configuration:ConfigCls = ConfigCls('./Config.ini')
 
 
 
 
 
 
-ConfigFile:Config = Config.ConfigCls('../Config.ini')
-db_host = ConfigFile.DbHost();
-db_user = ConfigFile.DbUser();
-db_password = ConfigFile.DbPassword();
-engine = create_engine('mysql://' + 'root:' + db_password + '@' + db_host + ':' + str(3306) + '/' + 'github', echo=False)
 
 
 
+db_sql:Database = Database();
+
+db_engine, db_session = Database.DbConnect(configuration);
 
 
+repo_table , repo_arr = Database.DbAddRepoTable();
+issues_arr, issue_table =  Database.DbAddIssuesTable();
+commit_table, commit_arr =  Database.DbAddCommitTable();
+milestone_table, milestone_arr = Database.DbAddMilestonesTable();
+comments_table, comments_arr =  Database.DbAddCommentsTable();
 
-metadata = MetaData(bind=engine)
-Session = sessionmaker(bind=engine)
-db_session = Session()
-
-repo_fields_arr=['id', 'name', 'forks', 'open_issues', 'watchers'];
-repository_table = Table('repository', metadata
-                         , Column('id', Integer, primary_key=True), Column('name', String(60)), Column('forks', Integer)
-                         , Column('open_issues', Integer), Column('watchers', Integer)
-                         , mysql_engine='InnoDB', )
-
-
-issues_arr = ['id', 'repository_id', 'creator', 'number', 'open_date', 'close_date'];
-issue_table = Table('issue', metadata,
-                    Column('id', Integer, autoincrement=True, primary_key=True),
-                    Column('repository_id', Integer, ForeignKey('repository.id')),
-                    Column('creator', String(60)),
-                    Column('number', Integer),
-                    Column('open_date', DateTime),
-                    Column('close_date', DateTime),
-                     Column('issue', VARCHAR(500)),
-                    mysql_engine='InnoDB',
-                    )
-
-
-
-commit_arr = ['id', 'repository_id', 'committer'];
-commit_table = Table('commit', metadata,
-                     Column('id', Integer, autoincrement=True, primary_key=True),
-                     Column('repository_id', Integer, ForeignKey('repository.id')),
-                     Column('committer', String(60)),
-                     mysql_engine='InnoDB'
-                     )
 
 # create tables in database
-metadata.create_all()
+db_sql.create_all()
 
+
+
+
+git_user=configuration.GitUser()
+git_password=configuration.GitPassword()
 git_session = requests.Session()
-git_user=ConfigFile.GitUser()
-git_password=ConfigFile.GitPassword()
 git_session.auth = (git_user, git_password)
 
-# Get some random words
-def RandomWords()->list:
-   combined_words = []
-   f = open('WordsAspects.txt', 'r')
-   words_aspects = f.read().split('\n')
 
-   f = open('WordsDomain.txt', 'r')
-   words_domain = f.read().split('\n')
+# Get some random words
+def RandomWords(config:Config)->list:
+   combined_words = []
+   words_aspects = config.WordsAspects();
+   words_domain = config.WordsDomain();
+
    for domain in words_domain:
       for aspect in words_aspects:
          if(domain and aspect):
             combined_words.append(domain + '+' + aspect)
    return (combined_words);
 
-random_words = RandomWords();
+random_words = RandomWords(configuration);
+
+
+
+
+
+
 
 
 
@@ -146,11 +133,11 @@ def InsertFields(names:list,fields:dict, table)->dict:
 
 # crawl around and gather data until the target sample size is reached
 def crawl(sample_size):
-   while (sample_size > db_session.query(repository_table).count()):
+   while (sample_size > db_session.query(repo_table).count()):
       try:
          repo = {};
          repo_rand = _get_random_repo();
-         repo = InsertFields(repo_fields_arr, repo_rand, repository_table)
+         repo = InsertFields(repo_arr, repo_rand, repo_table)
 
          url = 'https://api.github.com/repos/' + repo_rand['full_name'] + '/commits?per_page=100'
          while url is not None:
